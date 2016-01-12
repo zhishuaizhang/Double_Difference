@@ -8,6 +8,11 @@ Event_z   = 1 ;
 Station_x = 2 ;
 Station_y = 2 ;
 
+Velocity_model.zp = -1000 : 10 : 4000  ;
+Velocity_model.vp = 1800 * ones( size( Velocity_model.zp) )  ;
+Velocity_model.vs = .5 * Velocity_model.vp        ;
+Velocity_model.zs = Velocity_model.zp             ;
+
 Event_easting    = zeros( Event_x , Event_y , Event_z ) ;
 Event_northing   = zeros( Event_x , Event_y , Event_z ) ;
 Event_elevation  = zeros( Event_x , Event_y , Event_z ) ;
@@ -51,8 +56,8 @@ Source_location_true      = [ Event_easting(:)     , Event_northing(:)     , Eve
 Source_location_reference = [ Event_easting(1,1,1) , Event_northing(1,1,1) , Event_elevation(1,1,1) , Event_occurrence(1,1,1) ] ;
 Source_location_initial   = ones(size(Source_location_true,1),1) * Source_location_reference ;
 
-Arrival_time           = Calculate_arrival_time( Source_location_true , Receiver_location )           ;
-Arrival_time_reference = Calculate_arrival_time( Source_location_reference , Receiver_location ) ;
+Arrival_time           = Calculate_arrival_time( Source_location_true , Receiver_location , Velocity_model )           ;
+Arrival_time_reference = Calculate_arrival_time( Source_location_reference , Receiver_location , Velocity_model ) ;
 
 Difference_observe   = Arrival_time         - ones( size(Arrival_time,1) , 1 ) * Arrival_time_reference ;
 
@@ -62,7 +67,7 @@ Source_location = Source_location_initial ;
 
 tic
 
-Arrival_time   = Calculate_arrival_time( Source_location , Receiver_location ) ;
+Arrival_time   = Calculate_arrival_time( Source_location , Receiver_location , Velocity_model ) ;
 Difference_calculate = Arrival_time - ones( size(Arrival_time,1) , 1 ) * Arrival_time_reference ;
 
 Double_Difference = Difference_observe - Difference_calculate ;
@@ -75,7 +80,7 @@ for ii = 1 : length( Source_location(:) )
     
     Source_location_perturb(ii) = 1.001*Source_location_perturb(ii) ;
     
-    Arrival_time_perturb = Calculate_arrival_time( Source_location_perturb , Receiver_location ) ;
+    Arrival_time_perturb = Calculate_arrival_time( Source_location_perturb , Receiver_location , Velocity_model ) ;
     
     G(:,ii) = ( Arrival_time_perturb(:) - Arrival_time(:) ) / 0.001 / Source_location(ii) ;
 
