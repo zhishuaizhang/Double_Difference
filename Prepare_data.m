@@ -4,13 +4,12 @@ function [ Receivers , Sources_initial , Sources_true , Differences , Velocity_m
 
 Velocity_model.Elevation = -4000 : 10 : 1000               ;
 Velocity_model.Vp        = 3000 - Velocity_model.Elevation ;
-% Velocity_model.Vp        = 3000 * ones( size( Velocity_model.Elevation ) ) ;
 Velocity_model.Vs        = Velocity_model.Vp / sqrt(3)     ;
 
 %% Prepare sources
 Sources_x   = 3 ;
 Sources_y   = 3 ;
-Sources_z   = 1 ;
+Sources_z   = 2 ;
 
 Number_of_Sources = Sources_x * Sources_y * Sources_z ;
 
@@ -34,7 +33,7 @@ for zz = 1:Sources_z
                                                   
             Sources_true(Source_Index).Easting    = 100 * ( xx - 2 ) + 2500 ;
             Sources_true(Source_Index).Northing   = 100 * ( yy - 2 ) + 3000 ;
-            Sources_true(Source_Index).Elevation  = 100 * ( zz - 1 ) - 1500 ;
+            Sources_true(Source_Index).Elevation  = 100 * ( zz - 1 ) - 2000 ;
             Sources_true(Source_Index).Occurrence = xx + yy + zz            ;
             
         end
@@ -44,10 +43,10 @@ end
 Sources_initial = Sources_true ;
 
 for ii = 1:length(Sources_initial)
-    Sources_initial(ii).Easting    = Sources_true(5).Easting    ;
-    Sources_initial(ii).Northing   = Sources_true(5).Northing   ;
-    Sources_initial(ii).Elevation  = Sources_true(5).Elevation  ;
-    Sources_initial(ii).Occurrence = Sources_true(5).Occurrence ;
+    Sources_initial(ii).Easting    = Sources_true(1).Easting    ;
+    Sources_initial(ii).Northing   = Sources_true(1).Northing   ;
+    Sources_initial(ii).Elevation  = Sources_true(1).Elevation  ;
+    Sources_initial(ii).Occurrence = Sources_true(1).Occurrence ;
 end
 
 %% Prepare receivers
@@ -67,7 +66,7 @@ Receivers(Number_of_Receivers).ID = [] ;
 for yy = 1:Receivers_y
     for xx = 1:Receivers_x
                     
-            Receiver_Index = xx + (yy-1)*Receivers_x + (zz-1)*Receivers_x*Receivers_y ;
+            Receiver_Index = xx + (yy-1)*Receivers_x ;
             
             Receivers(Receiver_Index).ID = [ num2str(xx) , num2str(yy) ] ;
                                                   
