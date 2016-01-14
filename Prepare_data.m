@@ -4,6 +4,7 @@ function [ Receivers , Sources_initial , Sources_true , Differences , Velocity_m
 
 Velocity_model.Elevation = -4000 : 10 : 1000               ;
 Velocity_model.Vp        = 3000 - Velocity_model.Elevation ;
+% Velocity_model.Vp        = 3000 * ones( size( Velocity_model.Elevation ) ) ;
 Velocity_model.Vs        = Velocity_model.Vp / sqrt(3)     ;
 
 %% Prepare sources
@@ -40,6 +41,15 @@ for zz = 1:Sources_z
     end
 end
 
+Sources_initial = Sources_true ;
+
+for ii = 1:length(Sources_initial)
+    Sources_initial(ii).Easting    = Sources_true(5).Easting    ;
+    Sources_initial(ii).Northing   = Sources_true(5).Northing   ;
+    Sources_initial(ii).Elevation  = Sources_true(5).Elevation  ;
+    Sources_initial(ii).Occurrence = Sources_true(5).Occurrence ;
+end
+
 %% Prepare receivers
 
 Receivers_x = 2 ;
@@ -68,7 +78,7 @@ for yy = 1:Receivers_y
     end
 end
 
-Arrival_times = Calculte_arrival_times( Sources_true , Receivers , Velocity_model ) ;
+%% Prepare difference
 
 Differences.Source_1    = 'SourceID_1' ;
 Differences.Source_2    = 'SourceID_2' ;
@@ -84,35 +94,28 @@ ii = 0 ;
 for rr = 1:Number_of_Receivers
     for s1 = 1:Number_of_Sources
         for s2 = (s1+1):Number_of_Sources
-            
-            ii = ii + 1 ;
-            
-            Differences(ii).Source_1    = Sources_true(s1).ID ;
-            Differences(ii).Source_2    = Sources_true(s2).ID ;
-            Differences(ii).Receiver    = Receivers(rr).ID    ;
-            Differences(ii).Value       =   Arrival_times(1).Values(s1,rr) ...
-                                          - Arrival_times(1).Values(s2,rr) ;
-            Differences(ii).Uncertainty = 0.1 ;
-            Differences(ii).Phase       = 'P' ;
-            
-            ii = ii + 1 ;
-            
-            Differences(ii).Source_1    = Sources_true(s1).ID ;
-            Differences(ii).Source_2    = Sources_true(s2).ID ;
-            Differences(ii).Receiver    = Receivers(rr).ID    ;
-            Differences(ii).Value       =   Arrival_times(2).Values(s1,rr) ...
-                                          - Arrival_times(2).Values(s2,rr) ;
-            Differences(ii).Uncertainty = 0.1 ;
-            Differences(ii).Phase       = 'S' ;
+            for Phase = [ 'P' , 'S' ]
+                
+                ii = ii + 1 ;
+                
+                Arrival_time_1 = Calculte_arrival_time                  ...
+                ( Sources_true(s1) , Receivers(rr) , Velocity_model , Phase ) ; 
+
+                Arrival_time_2 = Calculte_arrival_time                  ...
+                ( Sources_true(s2) , Receivers(rr) , Velocity_model , Phase ) ; 
+        
+                Differences(ii).Source_1    = Sources_true(s1).ID ;
+                Differences(ii).Source_2    = Sources_true(s2).ID ;
+                Differences(ii).Receiver    = Receivers(rr).ID    ;
+                Differences(ii).Value       = Arrival_time_1 - Arrival_time_2 ;
+                Differences(ii).Uncertainty = 0.1                 ;
+                Differences(ii).Phase       = Phase               ;
+                
+            end
             
         end
     end
 end
 
-Sources_initial = Sources_true ;
-
-for ii = 1:length(Sources_initial)
-    Sources_initial(ii) = Sources_true(5) ;
-end
     
     
